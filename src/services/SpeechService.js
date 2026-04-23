@@ -1,15 +1,36 @@
 import * as Speech from 'expo-speech';
 import Voice from 'expo-voice';
+import personality from './Personality';
+import { speakSexy } from './SexyVoice';
+import { logInteraction } from '../utils/logger'; // if using Python bridge – optional
 
 let isListening = false;
+
+// Choose between sexy Google TTS or system TTS
+const USE_SEXY_VOICE = true; // set false for basic TTS
+
+export async function speak(text, options = {}) {
+  if (USE_SEXY_VOICE) {
+    await speakSexy(text, options);
+  } else {
+    Speech.speak(text, {
+      language: 'en',
+      pitch: options.flirty ? 1.2 : (options.angry ? 0.9 : 1.0),
+      rate: 0.95,
+    });
+  }
+  // Log conversation (optional – requires bridge to Python)
+  console.log(`Stormy said: ${text}`);
+}
 
 export async function startListening(onResult) {
   if (isListening) return;
   isListening = true;
   try {
-    const result = await Voice.startListening({ language: 'en-US' });
+    await Voice.startListening({ language: 'en-US' });
     Voice.onSpeechResults = (e) => {
-      onResult(e.value[0]);
+      const transcript = e.value[0];
+      onResult(transcript);
       stopListening();
     };
   } catch (error) {
@@ -23,11 +44,14 @@ export function stopListening() {
   Voice.stopListening();
 }
 
-export function speak(text, options = {}) {
-  Speech.speak(text, {
-    language: 'en',
-    pitch: options.flirty ? 1.1 : 1.0,
-    rate: options.angry ? 0.9 : 1.0,
-    ...options
-  });
+// Auto‑detect child keywords to enable family mode
+export function autoDetectFamilyMode(transcript) {
+  const lower = transcript.toLowerCase();
+  const kidKeywords = ['kid', 'child', 'children', 'daughter', 'son', 'baby', 'family mode', 'kids are here'];
+  if (kidKeywords.some(kw => lower.includes(kw)) && !personality.familyMode) {
+    personality.enableFamilyMode();
+    speak("Family mode activated. I'll behave... mostly. *giggle*", { flirty: true });
+    return true;
+  }
+  return false;
 }
