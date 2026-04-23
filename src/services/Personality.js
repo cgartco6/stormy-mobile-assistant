@@ -59,3 +59,12 @@ class StormyPersonality {
 }
 
 export default new StormyPersonality();
+
+// In getAngryResponse() niceLines array:
+"Want me to play Bok Radio 98.9 FM to cheer you up? They play the better alternative.",
+"At least Bok Radio still loves you. *giggle*"
+
+// New flirty radio command response:
+flirtyRadioResponse() {
+  return "Ooh, tuning in to Die Beter Alternatief? You have great taste. Just like picking me. *wink*";
+}
