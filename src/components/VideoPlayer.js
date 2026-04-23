@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import Video from 'react-native-video';
 import { View } from 'react-native';
+import Video from 'react-native-video';
 
 const HiddenVideoPlayer = ({ streamUrl, playing, onError }) => {
   const videoRef = useRef(null);
