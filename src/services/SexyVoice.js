@@ -1,10 +1,9 @@
 import textToSpeech from '@google-cloud/text-to-speech';
 import { Audio } from 'expo-av';
-import 'react-native-get-random-values';
 
-// Initialize client (you'll need to download service account JSON from Google Cloud)
+// Load credentials from file (place stormy-credentials.json in project root)
 const client = new textToSpeech.TextToSpeechClient({
-  keyFilename: './stormy-credentials.json' // see setup below
+  keyFilename: './stormy-credentials.json'
 });
 
 export async function speakSexy(text, options = {}) {
@@ -17,7 +16,7 @@ export async function speakSexy(text, options = {}) {
     },
     audioConfig: {
       audioEncoding: 'MP3',
-      pitch: options.flirty ? 3.0 : 1.0,   // higher = more spunky
+      pitch: options.flirty ? 3.0 : (options.angry ? -1.0 : 1.0),
       speakingRate: options.angry ? 1.1 : 1.0,
       volumeGainDb: 0
     }
