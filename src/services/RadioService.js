@@ -2,32 +2,43 @@ import { Audio } from 'expo-av';
 
 let soundObject = null;
 
-// Station details from official sources
-const STATION_INFO = {
-  name: "Bok Radio 98.9 FM",
-  tagline: "Die Beter Alternatief",
-  website: "https://www.bokradio.co.za",
-  social: "@bokradio"
-};
+export async function setupAudioMode() {
+  await Audio.setAudioModeAsync({
+    allowsRecordingIOS: false,
+    staysActiveInBackground: true,
+    playsInSilentModeIOS: true,
+    shouldDuckAndroid: true,
+    playThroughEarpieceAndroid: false,
+  });
+}
 
-export async function playRadio() {
+export async function playRadio(streamUrl) {
   if (soundObject) await stopRadio();
-  
-  // ⚠️ REPLACE THIS with the actual stream URL (see steps below)
-  const STREAM_URL = 'https://example.com/bokradio-98.9fm/stream';
-  
+  await setupAudioMode();
+
   try {
     const { sound } = await Audio.Sound.createAsync(
-      { uri: STREAM_URL },
-      { shouldPlay: true, isLooping: true }
+      { uri: streamUrl },
+      { shouldPlay: true, isLooping: true, progressUpdateIntervalMillis: 1000 },
+      (status) => {
+        if (status.isLoaded && status.error) {
+          console.error('HLS error:', status.error);
+        }
+      }
     );
     soundObject = sound;
     await sound.playAsync();
-    console.log(`Now playing: ${STATION_INFO.name} - ${STATION_INFO.tagline}`);
+    return `Bok Radio 98.9 FM – Die Beter Alternatief – is now playing. Try not to sing too badly. *giggle*`;
   } catch (error) {
     console.error('Radio error:', error);
-    throw new Error('Could not play Bok Radio. The stream URL may have changed.');
+    throw new Error('Stream unavailable');
   }
 }
 
-// ... stopRadio() remains the same
+export async function stopRadio() {
+  if (soundObject) {
+    await soundObject.stopAsync();
+    await soundObject.unloadAsync();
+    soundObject = null;
+  }
+}
